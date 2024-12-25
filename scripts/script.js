@@ -28,6 +28,7 @@ $(document).ready(function() {
         selectedCoin.html(`
             <img src="images/${coins[index].image}" alt="${coins[index].name}" class="selected-coin-image">
             <p>${coins[index].name}</p> 
+            <div id="tooltip"></div>
         `);
     }
 
@@ -89,8 +90,8 @@ $(document).ready(function() {
         chartContainer.append(candlesticksContainer);
     
         const scales = computeScales();
-        const stickWidth = 13; // Width of each candlestick
-        const maxCandlesticks = 79;
+        const stickWidth = 11; // Width of each candlestick
+        const maxCandlesticks = 89;
         const xOffset = Math.max(0, currentDay - maxCandlesticks + 1) * stickWidth;
     
         let minValue = Infinity;
@@ -143,13 +144,30 @@ $(document).ready(function() {
                     transform: 'translateX(-50%)',
                 });
     
-                const bar = $(`<div class="bar"></div>`).css({
-                    height: `${barHeight}px`,
-                    bottom: `${barPos}px`,
-                    background: color,
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
-                });
+                const bar = $(`<div class="bar"></div>`)
+                    .css({
+                        height: `${barHeight}px`,
+                        bottom: `${barPos}px`,
+                        background: color,
+                        left: '50%', 
+                        transform: 'translateX(-50%)',
+                    })
+                    .data({
+                        date: day.date,
+                        open: open,
+                        close: close,
+                        high: high,
+                        low: low,
+                    })
+                    .on('mouseenter', function () {
+                        const data = $(this).data();
+                        $('#tooltip').html(
+                            `Date: ${data.date} Open: $${data.open} Close: $${data.close} High: $${data.high} Low: $${data.low}`
+                        ).css('visibility', 'visible');
+                    })
+                    .on('mouseleave', function () {
+                        $('#tooltip').css('visibility', 'hidden');
+                    });
     
                 candlestick.append(stick).append(bar);
                 candlesticksContainer.append(candlestick);
