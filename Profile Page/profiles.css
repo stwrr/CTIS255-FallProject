@@ -1,4 +1,4 @@
-/* Genel stiller */
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -10,7 +10,7 @@ body {
     background-color: #f0f0f0;
 }
 
-/* Sayfa kapsayıcısı */
+/* page container */
 .container {
     width: 1000px;
     margin: 0 auto;
@@ -44,7 +44,7 @@ header p {
     color: #666;
 }
 
-/* Ana içerik */
+/* MAIN */
 main {
     flex: 1;
     display: flex;
