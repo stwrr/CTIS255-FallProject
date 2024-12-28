@@ -1,0 +1,14 @@
+ // Navigate to Page 2
+     $(document).on('click', '.profile-card', function () {
+        const profileName = $(this).find('div:nth-child(2)').text().trim();
+           $("#profile-page").removeClass("active");
+        $("#profile-page").addClass("deactive");
+           $("#trading-page").removeClass("deactive");
+           $("#trading-page").addClass("active");
+    
+           $(".right-section p").html(`<i class="fas fa-user"></i> ${profileName}`);
+    
+           $("#page-style").attr("href", "style.css"); // Trading page css file
+            getProfile();
+         });
+    
