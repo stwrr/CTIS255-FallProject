@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Trading Information System</title>
     <link id="page-style" rel="stylesheet" href="profiles.css">
-    
+    <link rel="stylesheet" href="tradingUI.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
    
@@ -73,7 +74,46 @@
             
             <div class="chart"></div>
         </main>
-    
+        
+        <div id="trading-content-container" class="trading-content-container">
+            <h2 id="total-money"><!-- balance --></h2>
+            
+            <div class="section-container">
+                <div class="trading-section">
+                    <h2 style="text-align: center">Trading</h2>
+                    <div class="toggle-group">
+                        <button class="button buy-button active" id="buy-toggle">
+                            Buy
+                        </button>
+                        <button class="button sell-button inactive" id="sell-toggle">
+                            Sell
+                        </button>
+                    </div>
+        
+                    <input type="number" id="amount" min="0" placeholder="Amount" />
+                    <span> =$<span id="transaction-value"></span></span>
+                    <button class="button buy-button" id="action-btn">
+                        Buy <!-- coin name  -->
+                    </button>
+                </div>
+        
+                <div class="wallet-section">
+                    <h2 style="text-align: center">Wallet</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Coin</th>
+                                <th>Amount</th>
+                                <th>Subtotal</th>
+                                <th>Last Close</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wallet-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
         <script src="scripts/db.js"></script>
         <script src="scripts/script.js"></script>
         

@@ -11,16 +11,28 @@ $(document).ready(function() {
     const dates = [];
     let startDate = new Date('2021-01-01');
 
-    let currentCoinCode = 'btc'; // Default selected coin
+    for (let i = 0; i < market.length; i++) {
+        dates.push({
+            day: i + 1,
+            date: startDate.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+            }),
+        });
+        startDate.setDate(startDate.getDate() + 1); // Increment the date by 1
+    }
 
-
- 
-
-
-
+    function updateDateDisplay() {
+        const current = dates[currentDay];
+        $('#day-display').text(`Day ${current.day}`);
+        $('#date-display').text(`${current.date}`);
+    }
 
 
     /*** RENDER COINS ***/
+    let currentCoinCode = 'btc'; // Default selected coin
+
     function renderCoins() {
         coins.forEach((coin, index) => {
             const coinElement = $(`
@@ -48,23 +60,8 @@ $(document).ready(function() {
     }
 
 
-    for (let i = 0; i < market.length; i++) {
-        dates.push({
-            day: i + 1,
-            date: startDate.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-            }),
-        });
-        startDate.setDate(startDate.getDate() + 1); // Increment the date by 1
-    }
+    
 
-    function updateDateDisplay() {
-        const current = dates[currentDay];
-        $('#day-display').text(`Day ${current.day}`);
-        $('#date-display').text(`${current.date}`);
-    }
 
     /*** CANDLESTICK CHART ***/
     function computeScales() {
@@ -217,6 +214,7 @@ $(document).ready(function() {
             currentDay++;
             updateDateDisplay();
             renderCandlestick();
+            renderWallet();
         }
     });
 
@@ -230,6 +228,7 @@ $(document).ready(function() {
                     currentDay++;
                     updateDateDisplay();
                     renderCandlestick();
+                    renderWallet();
                 } else {
                     clearInterval(fastForwardTimer); // Stop the timer when all days are displayed
                     fastForwardTimer = null;
@@ -247,14 +246,8 @@ $(document).ready(function() {
     });
 
     renderCoins();
-    updateDateDisplay();
-    renderCandlestick();
 
-
-
-
-
-
+    /*** SAVE USER STATE ***/
     function saveProfile(){//Saves; selected coin, current day, and puts into a dictionary
 
         const currentProfile=$('.right-section p').text().replace('👤 ', '').trim();
@@ -269,7 +262,6 @@ $(document).ready(function() {
 
 
     }
-
 
     function getProfile(){//Retrieves the profile from local storage
 
@@ -287,6 +279,7 @@ $(document).ready(function() {
             updateSelectedCoin(coins.findIndex((coin) => coin.code === currentCoinCode));
             updateDateDisplay();
             renderCandlestick();
+            renderWallet()
         }
 
         else{
@@ -297,13 +290,101 @@ $(document).ready(function() {
             updateSelectedCoin(coins.findIndex((coin) => coin.code === currentCoinCode));
             updateDateDisplay();
             renderCandlestick();
+            renderWallet()
         }
     }
 
+    function getWallet() {
+        const currentProfile = $('.right-section p').text().replace('👤 ', '').trim();
+        let wallet = JSON.parse(localStorage.getItem(`${currentProfile}_wallet`));
+        if (!wallet) {
+            wallet = { balance: 1000, coins: {} }; // Default starting balance
+            localStorage.setItem(`${currentProfile}_wallet`, JSON.stringify(wallet));
+        }
+        return wallet;
+    }
+    
+    function saveWallet(wallet) {
+        const currentProfile = $('.right-section p').text().replace('👤 ', '').trim();
+        localStorage.setItem(`${currentProfile}_wallet`, JSON.stringify(wallet));
+    }
 
+    function renderWallet() {
+        const wallet = getWallet();
+        $('#total-money').text(`$${wallet.balance.toFixed(2)}`);
+        const walletTable = $('#wallet-table');
+        walletTable.empty();
+    
+        Object.keys(wallet.coins).forEach((coin) => {
+            const { amount, subtotal } = wallet.coins[coin];
+            const lastClose = market[currentDay].coins.find((c) => c.code === coin).close;
+            walletTable.append(`
+                <tr>
+                    <td>${coin.toUpperCase()}</td>
+                    <td>${amount.toFixed(2)}</td>
+                    <td>$${subtotal.toFixed(2)}</td>
+                    <td>$${lastClose.toFixed(2)}</td>
+                </tr>
+            `);
+        });
+    }
 
-    console.log("before logout");
+    $('#buy-toggle').on('click', function () {
+        $('#buy-toggle').addClass('active').removeClass('inactive');
+        $('#sell-toggle').addClass('inactive').removeClass('active');
+        $('#action-btn').text('Buy'); // Update button text
+    });
+    
+    $('#sell-toggle').on('click', function () {
+        $('#sell-toggle').addClass('active').removeClass('inactive');
+        $('#buy-toggle').addClass('inactive').removeClass('active');
+        $('#action-btn').text('Sell'); // Update button text
+    });
 
+    $('#amount').on('input', function () {
+        const amount = parseFloat($('#amount').val()) || 0;
+        const lastClose = market[currentDay].coins.find((c) => c.code === currentCoinCode).close;
+        $('#transaction-value').text((amount * lastClose).toFixed(2));
+    });
+
+    $('#action-btn').on('click', function () {
+        const wallet = getWallet();
+        const amount = parseFloat($('#amount').val());
+        const lastClose = market[currentDay].coins.find((c) => c.code === currentCoinCode).close;
+        const transactionValue = amount * lastClose;
+    
+        if ($('#buy-toggle').hasClass('active')) {
+            // Buying logic
+            if (wallet.balance >= transactionValue) {
+                wallet.balance -= transactionValue;
+                if (!wallet.coins[currentCoinCode]) {
+                    wallet.coins[currentCoinCode] = { amount: 0, subtotal: 0 };
+                }
+                wallet.coins[currentCoinCode].amount += amount;
+                wallet.coins[currentCoinCode].subtotal += transactionValue;
+                saveWallet(wallet);
+                renderWallet();
+            } else {
+                alert('Insufficient balance to complete the transaction.');
+            }
+        } else {
+            // Selling logic
+            if (wallet.coins[currentCoinCode] && wallet.coins[currentCoinCode].amount >= amount) {
+                wallet.balance += transactionValue;
+                wallet.coins[currentCoinCode].amount -= amount;
+                wallet.coins[currentCoinCode].subtotal -= transactionValue;
+                if (wallet.coins[currentCoinCode].amount <= 0) {
+                    delete wallet.coins[currentCoinCode];
+                }
+                saveWallet(wallet);
+                renderWallet();
+            } else {
+                alert('Insufficient coins to sell.');
+            }
+        }
+    });
+    
+    
     $('.btn.logout').on('click', function () {
         console.log("logout");
         $("#profile-page").removeClass("deactive");
@@ -316,31 +397,25 @@ $(document).ready(function() {
         saveProfile();
     });
 
-    
-         $(document).on('click', '.profile-card', function() {
-            console.log("Profile card clicked"); // Debug log
-            
-            const profileName = $(this).find('div:nth-child(2)').text().trim();
-            
-            // First, remove all classes
-            $("#profile-page, #trading-page").removeClass("active deactive");
-            
-            // Then add the appropriate classes
-            $("#profile-page").addClass("deactive");
-            $("#trading-page").addClass("active");
-           
-            // Update profile name display
-            $(".right-section p").html(`<i class="fas fa-user"></i> ${profileName}`);
-            
-            // Switch stylesheet
-            $("#page-style").attr("href", "style.css");
-            
-            // Load profile data
-            getProfile();
-            
-        });
-    
-
-
-
+    $(document).on('click', '.profile-card', function() {
+        console.log("Profile card clicked"); // Debug log
+        
+        const profileName = $(this).find('div:nth-child(2)').text().trim();
+        
+        // First, remove all classes
+        $("#profile-page, #trading-page").removeClass("active deactive");
+        
+        // Then add the appropriate classes
+        $("#profile-page").addClass("deactive");
+        $("#trading-page").addClass("active");
+        
+        // Update profile name display
+        $(".right-section p").html(`<i class="fas fa-user"></i> ${profileName}`);
+        
+        // Switch stylesheet
+        $("#page-style").attr("href", "style.css");
+        
+        // Load profile data
+        getProfile();
+    });
 });

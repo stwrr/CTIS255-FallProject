@@ -1,0 +1,122 @@
+.trading-content-container {
+    margin-top: 1rem;
+}
+
+.trading-section {
+    flex-grow: 1;
+    width: 30rem;
+    margin-right: 4%;
+    background-color: #fff;
+}
+.wallet-section {
+    margin: 10px;
+    flex-grow: 5;
+    background-color: #fff9;
+    transition: width 0.5s ease-in-out; 
+    max-width: 1000px;
+}
+
+table {
+    width: 100%;
+    background-color: white;
+    border-collapse: collapse;
+}
+th,
+td {
+    text-align: start;
+    padding: 8px;
+}
+th {
+    background-color: #7a7aeb;
+    color: white;
+}
+
+#cash-balance-row td {
+    background-color: #77fe77;
+    font-weight: bold;
+    text-align: justify;
+}
+td:nth-child(2),
+td:nth-child(3),
+td:nth-child(4) {
+    background-color: white;
+}
+.coin-data {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+}
+.coin-data img {
+    width: 24px;
+    height: 24px;
+}
+.button {
+    padding: 10px 15px;
+    cursor: pointer;
+    margin: 0.5rem 0;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    text-align: center;
+}
+.buy-button {
+    background-color: #4caf50;
+}
+.sell-button {
+    background-color: red;
+}
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+}
+.active {
+    opacity: 1;
+}
+.inactive {
+    opacity: 0.5;
+}
+#total-money {
+    text-align: center;
+    font-size: 37px;
+    font-weight: bold;
+    height: 48px;
+    /* transition: font-size 0.5s ease-in-out; */
+}
+
+#amount {
+    /* CSS FOR INPUT */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.animate-total-money {
+    animation: pulse 1.5s infinite;
+}
+
+.section-container {
+    display: flex;
+}
+
+
+@keyframes pulse {
+    0% {
+        font-size: 37px;
+    }
+    50% {
+        font-size: 50px;
+    }
+    100% {
+        font-size: 37px;
+    }
+}
+
+.buy-button {
+    background-color: #4caf50; /* Green for buying */
+}
+
+.sell-button {
+    background-color: red; /* Red for selling */
+}
